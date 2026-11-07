@@ -1,5 +1,9 @@
 %%% Basic read data and visualization for the course SM2501
 %%% Biomechanics of Human Movement at KTH - 2026
+clear; close all; clc;
+W_R_FS1 = 124; W_R_TO = 177; W_R_FS2 = 212; 
+W_L_FS1 = 168; W_L_TO = 223; W_L_FS2 = 257; 
+C_R_FS1 = 190; C_R_TO = 250; C_R_FS2 = 288;
 %% Setup files
 name_motion={'Walking'    'Jogging'   'Crouch'};
 name_grf   ={'Walking_FP' 'Jogging_FP' 'Crouch_FP'};
@@ -15,7 +19,7 @@ data_grf = readtable(fullfile(file_dir,[name_grf{index} '.csv']));
 
 %% Downsample ground reaction data
 % down sample the ground reaction data, so it has the same length as marker trajectory
-data_grf_s = downsample(data_grf,10);
+data_grf_s = data_grf(1:10:end,:);
 
 %% Assign the uploaded table to variables in MATLAB
 toMeters=1/1000; % data is originally in mm, it has to be divided by 1000 to have it in meters
@@ -43,6 +47,8 @@ FP1_COP_y  =(600 - data_grf_s.FP1_COP_Y)*toMeters;     FP1_COP_z  =data_grf_s.FP
 
 FP2_force_y=data_grf_s.FP2_Force_Y;            FP2_force_z=data_grf_s.FP2_Force_Z;
 FP2_COP_y=(-600 - data_grf_s.FP2_COP_Y)*toMeters;       FP2_COP_z=data_grf_s.FP2_COP_Z*toMeters;
+
+Frame_W = data_trc.Frame;
 
 %%PHASE 2: Kinematics - Joint Angles
 % WALKING
@@ -151,3 +157,45 @@ ylabel('Ankle relative angle L_deg')
 xlabel('Frame')
 title('L Ankle rel angle - Walking')
 %}
+
+
+% ---------- Walking, right (124–212) ----------
+rows_W_R   = find(Frame_W == W_R_FS1) : find(Frame_W == W_R_FS2);
+n_W_R      = length(rows_W_R);% 89
+gc_W_R     = linspace(0, 100, n_W_R);
+TO_pct_W_R = (W_R_TO - W_R_FS1) / (W_R_FS2 - W_R_FS1) * 100;
+
+trunk_W_R_gc  = trunk_angle_W(rows_W_R);
+pelvis_W_R_gc = pelvis_angle_W(rows_W_R);
+hip_R_W_gc    = hip_R_W(rows_W_R);
+knee_R_W_gc   = knee_R_W(rows_W_R);
+ankle_R_W_gc  = ankle_R_W(rows_W_R);
+
+% ---------- Walking, left (168–257) ----------
+rows_W_L   = find(Frame_W == W_L_FS1) : find(Frame_W == W_L_FS2);
+n_W_L      = length(rows_W_L);% 90
+gc_W_L     = linspace(0, 100, n_W_L);
+TO_pct_W_L = (W_L_TO - W_L_FS1) / (W_L_FS2 - W_L_FS1) * 100;
+trunk_W_L_gc  = trunk_angle_W(rows_W_L);
+pelvis_W_L_gc = pelvis_angle_W(rows_W_L);
+hip_L_W_gc    = hip_L_W(rows_W_L);
+knee_L_W_gc   = knee_L_W(rows_W_L);
+ankle_L_W_gc  = ankle_L_W(rows_W_L);
+
+% ---------- Crouch, right (190–288) ----------
+%{
+rows_C_R   = find(Frame_C == C_R_FS1) : find(Frame_C == C_R_FS2);
+n_C_R      = length(rows_C_R);                 % 99
+gc_C_R     = linspace(0, 100, n_C_R);
+TO_pct_C_R = (C_R_TO - C_R_FS1) / (C_R_FS2 - C_R_FS1) * 100;
+
+trunk_C_R_gc  = trunk_angle_C(rows_C_R);
+pelvis_C_R_gc = pelvis_angle_C(rows_C_R);
+hip_R_C_gc    = hip_R_C(rows_C_R);
+knee_R_C_gc   = knee_R_C(rows_C_R);
+ankle_R_C_gc  = ankle_R_C(rows_C_R);
+%}
+% ---------- check ----------
+fprintf('W_R: frames %d–%d, n = %d\n', Frame_W(rows_W_R(1)), Frame_W(rows_W_R(end)), n_W_R);
+fprintf('W_L: frames %d–%d, n = %d\n', Frame_W(rows_W_L(1)), Frame_W(rows_W_L(end)), n_W_L);
+%fprintf('C_R: frames %d–%d, n = %d\n', Frame_C(rows_C_R(1)), Frame_C(rows_C_R(end)), n_C_R);

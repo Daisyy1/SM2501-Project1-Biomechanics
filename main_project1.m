@@ -5,6 +5,8 @@ W_R_FS1 = 124; W_R_TO = 177; W_R_FS2 = 212;
 W_L_FS1 = 168; W_L_TO = 223; W_L_FS2 = 257; 
 C_R_FS1 = 190; C_R_TO = 250; C_R_FS2 = 288;
 
+dt = 0.01;      % sampling interval (s), 100 Hz
+
 BM = 61.9;      % body mass (kg)
 H  = 1.770;     % height (m)
 
@@ -20,58 +22,51 @@ com_shank_frac  = 0.43;     % from knee toward ankle
 com_thigh_frac  = 0.43;     % from hip toward knee
 com_pelvis_frac = 0.25;     % from PELO toward PELP
 
-%% Setup files
-name_motion={'Walking'    'Jogging'   'Crouch'};
-name_grf   ={'Walking_FP' 'Jogging_FP' 'Crouch_FP'};
-
-% frame_sel  =[];
-
-index=1; % select the motion to be loaded and visualized e.g., index=1 -> NormWalk
-%% Read marker trajectory and ground reaction data
+%% Read WALKING marker trajectory and ground reaction data
 % data files should be in the same folder as the .m file
 file_dir = pwd;
-data_trc = readtable(fullfile(file_dir,[name_motion{index} '.csv']));
-data_grf = readtable(fullfile(file_dir,[name_grf{index} '.csv']));
+data_trc_W = readtable(fullfile(file_dir,'Walking.csv'));
+data_grf_W = readtable(fullfile(file_dir,'Walking_FP.csv'));
 
 %% Downsample ground reaction data
 % down sample the ground reaction data, so it has the same length as marker trajectory
-data_grf_s = data_grf(1:10:end,:);
+data_grf_s_W = data_grf_W(1:10:end,:);
 
 %% Assign the uploaded table to variables in MATLAB
 toMeters=1/1000; % data is originally in mm, it has to be divided by 1000 to have it in meters
 
-RTOE_y=data_trc.RTOO_Y*toMeters;   RTOE_z=data_trc.RTOO_Z*toMeters;    % horizontal coordinate of the right toe & vertical coordinate of the right toe 
-LTOE_y=data_trc.LTOO_Y*toMeters;   LTOE_z=data_trc.LTOO_Z*toMeters;    % horizontal coordinate of the left toe & vertical coordinate of the left toe 
+RTOE_y_W=data_trc_W.RTOO_Y*toMeters;   RTOE_z_W=data_trc_W.RTOO_Z*toMeters;    % horizontal coordinate of the right toe & vertical coordinate of the right toe 
+LTOE_y_W=data_trc_W.LTOO_Y*toMeters;   LTOE_z_W=data_trc_W.LTOO_Z*toMeters;    % horizontal coordinate of the left toe & vertical coordinate of the left toe 
 
-RANKLE_y=data_trc.RAJC_Y*toMeters;   RANKLE_z=data_trc.RAJC_Z*toMeters;   
-LANKLE_y=data_trc.LAJC_Y*toMeters;   LANKLE_z=data_trc.LAJC_Z*toMeters;   
+RANKLE_y_W=data_trc_W.RAJC_Y*toMeters;   RANKLE_z_W=data_trc_W.RAJC_Z*toMeters;   
+LANKLE_y_W=data_trc_W.LAJC_Y*toMeters;   LANKLE_z_W=data_trc_W.LAJC_Z*toMeters;   
 
-RKNEE_y=data_trc.RKJC_Y*toMeters;   RKNEE_z=data_trc.RKJC_Z*toMeters;    
-LKNEE_y=data_trc.LKJC_Y*toMeters;   LKNEE_z=data_trc.LKJC_Z*toMeters;   
+RKNEE_y_W=data_trc_W.RKJC_Y*toMeters;   RKNEE_z_W=data_trc_W.RKJC_Z*toMeters;    
+LKNEE_y_W=data_trc_W.LKJC_Y*toMeters;   LKNEE_z_W=data_trc_W.LKJC_Z*toMeters;   
 
-RHIP_y=data_trc.RHJC_Y*toMeters;   RHIP_z=data_trc.RHJC_Z*toMeters;    
-LHIP_y=data_trc.LHJC_Y*toMeters;   LHIP_z=data_trc.LHJC_Z*toMeters;  
+RHIP_y_W=data_trc_W.RHJC_Y*toMeters;   RHIP_z_W=data_trc_W.RHJC_Z*toMeters;    
+LHIP_y_W=data_trc_W.LHJC_Y*toMeters;   LHIP_z_W=data_trc_W.LHJC_Z*toMeters;  
 
-PELO_y=data_trc.PELO_Y*toMeters;   PELO_z=data_trc.PELO_Z*toMeters;    
-PELP_y=data_trc.PELP_Y*toMeters;   PELP_z=data_trc.PELP_Z*toMeters;   
+PELO_y_W=data_trc_W.PELO_Y*toMeters;   PELO_z_W=data_trc_W.PELO_Z*toMeters;    
+PELP_y_W=data_trc_W.PELP_Y*toMeters;   PELP_z_W=data_trc_W.PELP_Z*toMeters;   
 
-TRXO_y=data_trc.TRXO_Y*toMeters;   TRXO_z=data_trc.TRXO_Z*toMeters;    
-TRXP_y=data_trc.TRXP_Y*toMeters;   TRXP_z=data_trc.TRXP_Z*toMeters;  
+TRXO_y_W=data_trc_W.TRXO_Y*toMeters;   TRXO_z_W=data_trc_W.TRXO_Z*toMeters;    
+TRXP_y_W=data_trc_W.TRXP_Y*toMeters;   TRXP_z_W=data_trc_W.TRXP_Z*toMeters;  
 
-FP1_force_y=data_grf_s.FP1_Force_Y;            FP1_force_z=data_grf_s.FP1_Force_Z;
-FP1_COP_y  =(600 - data_grf_s.FP1_COP_Y)*toMeters;     FP1_COP_z  =data_grf_s.FP1_COP_Z*toMeters;
+FP1_force_y_W=data_grf_s_W.FP1_Force_Y;            FP1_force_z_W=data_grf_s_W.FP1_Force_Z;
+FP1_COP_y_W  =(600 - data_grf_s_W.FP1_COP_Y)*toMeters;     FP1_COP_z_W  =data_grf_s_W.FP1_COP_Z*toMeters;
 
-FP2_force_y=data_grf_s.FP2_Force_Y;            FP2_force_z=data_grf_s.FP2_Force_Z;
-FP2_COP_y=(-600 - data_grf_s.FP2_COP_Y)*toMeters;       FP2_COP_z=data_grf_s.FP2_COP_Z*toMeters;
+FP2_force_y_W=data_grf_s_W.FP2_Force_Y;            FP2_force_z_W=data_grf_s_W.FP2_Force_Z;
+FP2_COP_y_W=(-600 - data_grf_s_W.FP2_COP_Y)*toMeters;       FP2_COP_z_W=data_grf_s_W.FP2_COP_Z*toMeters;
 
-Frame_W = data_trc.Frame;
+Frame_W = data_trc_W.Frame;
 
 %%PHASE 2: Kinematics - Joint Angles
 % WALKING
 % Trunk absolute angle (relative to vertical)
-trunk_dy = TRXO_y - TRXP_y;
-trunk_dz = TRXO_z - TRXP_z;
-trunk_angle_W = atan2(trunk_dy, trunk_dz); %it's in radiant!
+trunk_dy_W = TRXO_y_W - TRXP_y_W;
+trunk_dz_W = TRXO_z_W - TRXP_z_W;
+trunk_angle_W = atan2(trunk_dy_W, trunk_dz_W); %it's in radiant!
 % Convert trunk angle from radians to degrees for easier interpretation
 trunk_angle_W_deg = rad2deg(trunk_angle_W);
 %{
@@ -86,9 +81,9 @@ title('Trunk angle - Walking')
 % <0 = trunk leans backward (posterior tilt)
 
 % Pelvis: PELO = origin/inferior; PELP = proximal/superior
-pelvis_dy = PELP_y - PELO_y;
-pelvis_dz = PELP_z - PELO_z;
-pelvis_angle_W = atan2(pelvis_dy, pelvis_dz);
+pelvis_dy_W = PELP_y_W - PELO_y_W;
+pelvis_dz_W = PELP_z_W - PELO_z_W;
+pelvis_angle_W = atan2(pelvis_dy_W, pelvis_dz_W);
 pelvis_angle_W_deg = rad2deg(pelvis_angle_W);
 % >0 = anterior pelvic tilt; <0 = posterior
 %{
@@ -101,17 +96,17 @@ title('Pelvis angle - Walking')
 % REVIEW these results!!!! the angles seemed too big
 
 % Right hip angle (walking)
-thigh_R_dy = RHIP_y - RKNEE_y; % hip minus knee = points upward
-thigh_R_dz = RHIP_z - RKNEE_z;
-thigh_R_abs = atan2(thigh_R_dy, thigh_R_dz);
-hip_R_W = rad2deg(thigh_R_abs - pelvis_angle_W);
+thigh_R_dy_W = RHIP_y_W - RKNEE_y_W; % hip minus knee = points upward
+thigh_R_dz_W = RHIP_z_W - RKNEE_z_W;
+thigh_R_abs_W = atan2(thigh_R_dy_W, thigh_R_dz_W);
+hip_R_W = rad2deg(thigh_R_abs_W - pelvis_angle_W);
 % >0 = hip flexion (thigh forward of pelvis)
 % <0 = hip extension (thigh behind pelvis)
 % Left hip: same but use LHIP and LKNEE
-thigh_L_dy = LHIP_y - LKNEE_y;
-thigh_L_dz = LHIP_z - LKNEE_z;
-thigh_L_abs = atan2(thigh_L_dy, thigh_L_dz);
-hip_L_W = rad2deg(thigh_L_abs - pelvis_angle_W);
+thigh_L_dy_W = LHIP_y_W - LKNEE_y_W;
+thigh_L_dz_W = LHIP_z_W - LKNEE_z_W;
+thigh_L_abs_W = atan2(thigh_L_dy_W, thigh_L_dz_W);
+hip_L_W = rad2deg(thigh_L_abs_W - pelvis_angle_W);
 %{
 figure (3);
 plot(hip_R_W)
@@ -127,15 +122,15 @@ title('L Hip rel angle - Walking')
 %CHECK ANGLES! do they make sense?
 
 % Right knee angle (walking)
-shank_R_dy = RKNEE_y - RANKLE_y; % knee minus ankle = points upward
-shank_R_dz = RKNEE_z - RANKLE_z;
-shank_R_abs = atan2(shank_R_dy, shank_R_dz);
-knee_R_W = rad2deg(shank_R_abs - thigh_R_abs);
+shank_R_dy_W = RKNEE_y_W - RANKLE_y_W; % knee minus ankle = points upward
+shank_R_dz_W = RKNEE_z_W - RANKLE_z_W;
+shank_R_abs_W = atan2(shank_R_dy_W, shank_R_dz_W);
+knee_R_W = rad2deg(shank_R_abs_W - thigh_R_abs_W);
 % >0 = knee flexion; <0 = hyperextension (rare, ~0 at full extension)
-shank_L_dy = LKNEE_y - LANKLE_y; % knee minus ankle = points upward
-shank_L_dz = LKNEE_z - LANKLE_z;
-shank_L_abs = atan2(shank_L_dy, shank_L_dz);
-knee_L_W = rad2deg(shank_L_abs - thigh_L_abs);
+shank_L_dy_W = LKNEE_y_W - LANKLE_y_W; % knee minus ankle = points upward
+shank_L_dz_W = LKNEE_z_W - LANKLE_z_W;
+shank_L_abs_W = atan2(shank_L_dy_W, shank_L_dz_W);
+knee_L_W = rad2deg(shank_L_abs_W - thigh_L_abs_W);
 %{
 figure (5);
 plot(knee_R_W)
@@ -150,17 +145,17 @@ title('L Knee rel angle - Walking')
 %}
 
 % Right ankle angle (walking)
-foot_R_dy = RTOE_y - RANKLE_y; % toe minus ankle = foot vector
-foot_R_dz = RTOE_z - RANKLE_z;
-foot_R_abs = atan2(foot_R_dy, foot_R_dz);
-ankle_R_W = rad2deg(foot_R_abs - shank_R_abs) -90 + 5;
+foot_R_dy_W = RTOE_y_W - RANKLE_y_W; % toe minus ankle = foot vector
+foot_R_dz_W = RTOE_z_W - RANKLE_z_W;
+foot_R_abs_W = atan2(foot_R_dy_W, foot_R_dz_W);
+ankle_R_W = rad2deg(foot_R_abs_W - shank_R_abs_W) -90 + 5;
 % +90 → makes anatomically neutral = 0°
 % +5 → anatomical correction (project-specified)
 % >0 = dorsiflexion; <0 = plantarflexion
-foot_L_dy = LTOE_y - LANKLE_y; % toe minus ankle = foot vector
-foot_L_dz = LTOE_z - LANKLE_z;
-foot_L_abs = atan2(foot_L_dy, foot_L_dz);
-ankle_L_W = rad2deg(foot_L_abs - shank_L_abs) - 90 + 5;
+foot_L_dy_W = LTOE_y_W - LANKLE_y_W; % toe minus ankle = foot vector
+foot_L_dz_W = LTOE_z_W - LANKLE_z_W;
+foot_L_abs_W = atan2(foot_L_dy_W, foot_L_dz_W);
+ankle_L_W = rad2deg(foot_L_abs_W - shank_L_abs_W) - 90 + 5;
 %{
 figure (7);
 plot(ankle_R_W)
@@ -174,48 +169,48 @@ xlabel('Frame')
 title('L Ankle rel angle - Walking')
 %}
 
-index = 3;   % Crouch
-data_trc = readtable(fullfile(file_dir,[name_motion{index} '.csv']));
-data_grf = readtable(fullfile(file_dir,[name_grf{index} '.csv']));
-data_grf_s = data_grf(1:10:end,:);
+%% Read CROUCH marker trajectory and ground reaction data
+data_trc_C = readtable(fullfile(file_dir,'Crouch.csv'));
+data_grf_C = readtable(fullfile(file_dir,'Crouch_FP.csv'));
+data_grf_s_C = data_grf_C(1:10:end,:);
 
-RTOE_y=data_trc.RTOO_Y*toMeters;   RTOE_z=data_trc.RTOO_Z*toMeters;
-RANKLE_y=data_trc.RAJC_Y*toMeters; RANKLE_z=data_trc.RAJC_Z*toMeters;
-RKNEE_y=data_trc.RKJC_Y*toMeters;  RKNEE_z=data_trc.RKJC_Z*toMeters;
-RHIP_y=data_trc.RHJC_Y*toMeters;   RHIP_z=data_trc.RHJC_Z*toMeters;
-PELO_y=data_trc.PELO_Y*toMeters;   PELO_z=data_trc.PELO_Z*toMeters;
-PELP_y=data_trc.PELP_Y*toMeters;   PELP_z=data_trc.PELP_Z*toMeters;
-TRXO_y=data_trc.TRXO_Y*toMeters;   TRXO_z=data_trc.TRXO_Z*toMeters;
-TRXP_y=data_trc.TRXP_Y*toMeters;   TRXP_z=data_trc.TRXP_Z*toMeters;
+RTOE_y_C=data_trc_C.RTOO_Y*toMeters;   RTOE_z_C=data_trc_C.RTOO_Z*toMeters;
+RANKLE_y_C=data_trc_C.RAJC_Y*toMeters; RANKLE_z_C=data_trc_C.RAJC_Z*toMeters;
+RKNEE_y_C=data_trc_C.RKJC_Y*toMeters;  RKNEE_z_C=data_trc_C.RKJC_Z*toMeters;
+RHIP_y_C=data_trc_C.RHJC_Y*toMeters;   RHIP_z_C=data_trc_C.RHJC_Z*toMeters;
+PELO_y_C=data_trc_C.PELO_Y*toMeters;   PELO_z_C=data_trc_C.PELO_Z*toMeters;
+PELP_y_C=data_trc_C.PELP_Y*toMeters;   PELP_z_C=data_trc_C.PELP_Z*toMeters;
+TRXO_y_C=data_trc_C.TRXO_Y*toMeters;   TRXO_z_C=data_trc_C.TRXO_Z*toMeters;
+TRXP_y_C=data_trc_C.TRXP_Y*toMeters;   TRXP_z_C=data_trc_C.TRXP_Z*toMeters;
 
-FP2_force_y=data_grf_s.FP2_Force_Y;  FP2_force_z=data_grf_s.FP2_Force_Z;
-FP2_COP_y=(-600 - data_grf_s.FP2_COP_Y)*toMeters;  FP2_COP_z=data_grf_s.FP2_COP_Z*toMeters;
+FP2_force_y_C=data_grf_s_C.FP2_Force_Y;  FP2_force_z_C=data_grf_s_C.FP2_Force_Z;
+FP2_COP_y_C=(-600 - data_grf_s_C.FP2_COP_Y)*toMeters;  FP2_COP_z_C=data_grf_s_C.FP2_COP_Z*toMeters;
 
-Frame_C = data_trc.Frame;
+Frame_C = data_trc_C.Frame;
 
 % ===== CROUCH: joint angles (right side) =====
-trunk_dy_C = TRXO_y - TRXP_y;
-trunk_dz_C = TRXO_z - TRXP_z;
+trunk_dy_C = TRXO_y_C - TRXP_y_C;
+trunk_dz_C = TRXO_z_C - TRXP_z_C;
 trunk_angle_C = atan2(-trunk_dy_C, trunk_dz_C);          % rad
 trunk_angle_C_deg = rad2deg(trunk_angle_C);
 
-pelvis_dy_C = PELP_y - PELO_y;
-pelvis_dz_C = PELP_z - PELO_z;
+pelvis_dy_C = PELP_y_C - PELO_y_C;
+pelvis_dz_C = PELP_z_C - PELO_z_C;
 pelvis_angle_C = atan2(-pelvis_dy_C, pelvis_dz_C);       % rad
 pelvis_angle_C_deg = rad2deg(pelvis_angle_C);
 
-thigh_R_dy_C = RHIP_y - RKNEE_y;
-thigh_R_dz_C = RHIP_z - RKNEE_z;
+thigh_R_dy_C = RHIP_y_C - RKNEE_y_C;
+thigh_R_dz_C = RHIP_z_C - RKNEE_z_C;
 thigh_R_abs_C = atan2(-thigh_R_dy_C, thigh_R_dz_C);
 hip_R_C = rad2deg(thigh_R_abs_C - pelvis_angle_C);
 
-shank_R_dy_C = RKNEE_y - RANKLE_y;
-shank_R_dz_C = RKNEE_z - RANKLE_z;
+shank_R_dy_C = RKNEE_y_C - RANKLE_y_C;
+shank_R_dz_C = RKNEE_z_C - RANKLE_z_C;
 shank_R_abs_C = atan2(-shank_R_dy_C, shank_R_dz_C);
 knee_R_C = rad2deg(shank_R_abs_C - thigh_R_abs_C);
 
-foot_R_dy_C = RTOE_y - RANKLE_y;
-foot_R_dz_C = RTOE_z - RANKLE_z;
+foot_R_dy_C = RTOE_y_C - RANKLE_y_C;
+foot_R_dz_C = RTOE_z_C - RANKLE_z_C;
 foot_R_abs_C = atan2(-foot_R_dy_C, foot_R_dz_C);
 ankle_R_C = rad2deg(foot_R_abs_C - shank_R_abs_C) - 90 + 5;
 
@@ -341,3 +336,101 @@ sgtitle('Figure 3. Normal vs crouch walking (right side): sagittal-plane angles'
 fontsize(fig3, 10, 'points')
 
 exportgraphics(fig3, 'Fig3_walking_vs_crouch_angles.png', 'Resolution', 300)
+
+%% PHASE 3 — Segment Geometry, CoM, Accelerations, Inertia
+% ─────────────────────────────────────────────────────────
+% 3.1 Segment lengths (frame-varying arrays)
+L_foot_R_W  = hypot(RTOE_y_W  - RANKLE_y_W, RTOE_z_W  - RANKLE_z_W);
+L_foot_L_W  = hypot(LTOE_y_W  - LANKLE_y_W, LTOE_z_W  - LANKLE_z_W);
+L_shank_R_W = hypot(RKNEE_y_W - RANKLE_y_W, RKNEE_z_W - RANKLE_z_W);
+L_shank_L_W = hypot(LKNEE_y_W - LANKLE_y_W, LKNEE_z_W - LANKLE_z_W);
+L_thigh_R_W = hypot(RHIP_y_W  - RKNEE_y_W,  RHIP_z_W  - RKNEE_z_W);
+L_thigh_L_W = hypot(LHIP_y_W  - LKNEE_y_W,  LHIP_z_W  - LKNEE_z_W);
+
+L_foot_R_C  = hypot(RTOE_y_C  - RANKLE_y_C, RTOE_z_C  - RANKLE_z_C);
+L_shank_R_C = hypot(RKNEE_y_C - RANKLE_y_C, RKNEE_z_C - RANKLE_z_C);
+L_thigh_R_C = hypot(RHIP_y_C  - RKNEE_y_C,  RHIP_z_C  - RKNEE_z_C);
+
+% ─────────────────────────────────────────────────────────
+% 3.2 Segment CoM positions (frame-varying)
+% Walking — right
+com_foot_R_y_W  = RANKLE_y_W + com_foot_frac  * (RTOE_y_W   - RANKLE_y_W);
+com_foot_R_z_W  = RANKLE_z_W + com_foot_frac  * (RTOE_z_W   - RANKLE_z_W);
+com_shank_R_y_W = RKNEE_y_W  + com_shank_frac * (RANKLE_y_W - RKNEE_y_W);
+com_shank_R_z_W = RKNEE_z_W  + com_shank_frac * (RANKLE_z_W - RKNEE_z_W);
+com_thigh_R_y_W = RHIP_y_W   + com_thigh_frac * (RKNEE_y_W  - RHIP_y_W);
+com_thigh_R_z_W = RHIP_z_W   + com_thigh_frac * (RKNEE_z_W  - RHIP_z_W);
+
+% Walking — left
+com_foot_L_y_W  = LANKLE_y_W + com_foot_frac  * (LTOE_y_W   - LANKLE_y_W);
+com_foot_L_z_W  = LANKLE_z_W + com_foot_frac  * (LTOE_z_W   - LANKLE_z_W);
+com_shank_L_y_W = LKNEE_y_W  + com_shank_frac * (LANKLE_y_W - LKNEE_y_W);
+com_shank_L_z_W = LKNEE_z_W  + com_shank_frac * (LANKLE_z_W - LKNEE_z_W);
+com_thigh_L_y_W = LHIP_y_W   + com_thigh_frac * (LKNEE_y_W  - LHIP_y_W);
+com_thigh_L_z_W = LHIP_z_W   + com_thigh_frac * (LKNEE_z_W  - LHIP_z_W);
+
+% Crouch — right
+com_foot_R_y_C  = RANKLE_y_C + com_foot_frac  * (RTOE_y_C   - RANKLE_y_C);
+com_foot_R_z_C  = RANKLE_z_C + com_foot_frac  * (RTOE_z_C   - RANKLE_z_C);
+com_shank_R_y_C = RKNEE_y_C  + com_shank_frac * (RANKLE_y_C - RKNEE_y_C);
+com_shank_R_z_C = RKNEE_z_C  + com_shank_frac * (RANKLE_z_C - RKNEE_z_C);
+com_thigh_R_y_C = RHIP_y_C   + com_thigh_frac * (RKNEE_y_C  - RHIP_y_C);
+com_thigh_R_z_C = RHIP_z_C   + com_thigh_frac * (RKNEE_z_C  - RHIP_z_C);
+
+% ─────────────────────────────────────────────────────────
+%  3.3  CoM linear accelerations  (gradient preserves length)
+% Walking right
+a_foot_R_y_W  = gradient(gradient(com_foot_R_y_W,  dt), dt);
+a_foot_R_z_W  = gradient(gradient(com_foot_R_z_W,  dt), dt);
+a_shank_R_y_W = gradient(gradient(com_shank_R_y_W, dt), dt);
+a_shank_R_z_W = gradient(gradient(com_shank_R_z_W, dt), dt);
+a_thigh_R_y_W = gradient(gradient(com_thigh_R_y_W, dt), dt);
+a_thigh_R_z_W = gradient(gradient(com_thigh_R_z_W, dt), dt);
+
+% Walking left
+a_foot_L_y_W  = gradient(gradient(com_foot_L_y_W,  dt), dt);
+a_foot_L_z_W  = gradient(gradient(com_foot_L_z_W,  dt), dt);
+a_shank_L_y_W = gradient(gradient(com_shank_L_y_W, dt), dt);
+a_shank_L_z_W = gradient(gradient(com_shank_L_z_W, dt), dt);
+a_thigh_L_y_W = gradient(gradient(com_thigh_L_y_W, dt), dt);
+a_thigh_L_z_W = gradient(gradient(com_thigh_L_z_W, dt), dt);
+
+% Crouch right
+a_foot_R_y_C  = gradient(gradient(com_foot_R_y_C,  dt), dt);
+a_foot_R_z_C  = gradient(gradient(com_foot_R_z_C,  dt), dt);
+a_shank_R_y_C = gradient(gradient(com_shank_R_y_C, dt), dt);
+a_shank_R_z_C = gradient(gradient(com_shank_R_z_C, dt), dt);
+a_thigh_R_y_C = gradient(gradient(com_thigh_R_y_C, dt), dt);
+a_thigh_R_z_C = gradient(gradient(com_thigh_R_z_C, dt), dt);
+
+% ─────────────────────────────────────────────────────────
+%  3.4  Segment angular accelerations
+alpha_foot_R_W  = gradient(gradient(foot_R_abs_W,  dt), dt);
+alpha_shank_R_W = gradient(gradient(shank_R_abs_W, dt), dt);
+alpha_thigh_R_W = gradient(gradient(thigh_R_abs_W, dt), dt);
+
+alpha_foot_L_W  = gradient(gradient(foot_L_abs_W,  dt), dt);
+alpha_shank_L_W = gradient(gradient(shank_L_abs_W, dt), dt);
+alpha_thigh_L_W = gradient(gradient(thigh_L_abs_W, dt), dt);
+
+alpha_foot_R_C  = gradient(gradient(foot_R_abs_C,  dt), dt);
+alpha_shank_R_C = gradient(gradient(shank_R_abs_C, dt), dt);
+alpha_thigh_R_C = gradient(gradient(thigh_R_abs_C, dt), dt);
+
+% ─────────────────────────────────────────────────────────
+%  3.5  Moments of inertia  I = m*(rho*L_mean)^2  [scalar per segment]
+% Radii of gyration (Winter 2009)
+rk_foot  = 0.475;% k is the radius of gyration and this number is the ratio of k/segment's length
+rk_shank = 0.302;
+rk_thigh = 0.323;
+
+I_foot_R_W  = m_foot  * (rk_foot  * mean(L_foot_R_W,  'omitnan'))^2;
+I_foot_L_W  = m_foot  * (rk_foot  * mean(L_foot_L_W,  'omitnan'))^2;
+I_shank_R_W = m_shank * (rk_shank * mean(L_shank_R_W, 'omitnan'))^2;
+I_shank_L_W = m_shank * (rk_shank * mean(L_shank_L_W, 'omitnan'))^2;
+I_thigh_R_W = m_thigh * (rk_thigh * mean(L_thigh_R_W, 'omitnan'))^2;
+I_thigh_L_W = m_thigh * (rk_thigh * mean(L_thigh_L_W, 'omitnan'))^2;
+
+I_foot_R_C  = m_foot  * (rk_foot  * mean(L_foot_R_C,  'omitnan'))^2;
+I_shank_R_C = m_shank * (rk_shank * mean(L_shank_R_C, 'omitnan'))^2;
+I_thigh_R_C = m_thigh * (rk_thigh * mean(L_thigh_R_C, 'omitnan'))^2;

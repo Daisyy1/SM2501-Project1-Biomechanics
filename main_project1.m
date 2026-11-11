@@ -104,14 +104,14 @@ title('Pelvis angle - Walking')
 thigh_R_dy_W = RHIP_y_W - RKNEE_y_W; % hip minus knee = points upward
 thigh_R_dz_W = RHIP_z_W - RKNEE_z_W;
 thigh_R_abs_W = atan2(thigh_R_dy_W, thigh_R_dz_W);
-hip_R_W = rad2deg(thigh_R_abs_W - pelvis_angle_W);
+hip_R_W = rad2deg(pelvis_angle_W - thigh_R_abs_W);
 % >0 = hip flexion (thigh forward of pelvis)
 % <0 = hip extension (thigh behind pelvis)
 % Left hip: same but use LHIP and LKNEE
 thigh_L_dy_W = LHIP_y_W - LKNEE_y_W;
 thigh_L_dz_W = LHIP_z_W - LKNEE_z_W;
 thigh_L_abs_W = atan2(thigh_L_dy_W, thigh_L_dz_W);
-hip_L_W = rad2deg(thigh_L_abs_W - pelvis_angle_W);
+hip_L_W = rad2deg(pelvis_angle_W - thigh_L_abs_W);
 %{
 figure (3);
 plot(hip_R_W)
@@ -153,14 +153,15 @@ title('L Knee rel angle - Walking')
 foot_R_dy_W = RTOE_y_W - RANKLE_y_W; % toe minus ankle = foot vector
 foot_R_dz_W = RTOE_z_W - RANKLE_z_W;
 foot_R_abs_W = atan2(foot_R_dy_W, foot_R_dz_W);
-ankle_R_W = rad2deg(foot_R_abs_W - shank_R_abs_W) -90 + 5;
+ankle_R_W = 90 - rad2deg(foot_R_abs_W - shank_R_abs_W) + 5;
 % +90 → makes anatomically neutral = 0°
 % +5 → anatomical correction (project-specified)
 % >0 = dorsiflexion; <0 = plantarflexion
 foot_L_dy_W = LTOE_y_W - LANKLE_y_W; % toe minus ankle = foot vector
 foot_L_dz_W = LTOE_z_W - LANKLE_z_W;
 foot_L_abs_W = atan2(foot_L_dy_W, foot_L_dz_W);
-ankle_L_W = rad2deg(foot_L_abs_W - shank_L_abs_W) - 90 + 5;
+ankle_L_W = 90 - rad2deg(foot_L_abs_W - shank_L_abs_W) + 5; %convention: dorsi is POSITIVE 
+% (if we did angle -90 then plantar would have been positive)
 %{
 figure (7);
 plot(ankle_R_W)
@@ -191,33 +192,46 @@ TRXP_y_C=data_trc_C.TRXP_Y*toMeters;   TRXP_z_C=data_trc_C.TRXP_Z*toMeters;
 FP2_force_y_C=data_grf_s_C.FP2_Force_Y;  FP2_force_z_C=data_grf_s_C.FP2_Force_Z;
 FP2_COP_y_C=(-600 - data_grf_s_C.FP2_COP_Y)*toMeters;  FP2_COP_z_C=data_grf_s_C.FP2_COP_Z*toMeters;
 
+% Crouch walking goes toward -y (normal walking toward +y).
+% Flip all crouch y data so that +y is the walking direction in both trials.
+RTOE_y_C   = -RTOE_y_C;
+RANKLE_y_C = -RANKLE_y_C;
+RKNEE_y_C  = -RKNEE_y_C;
+RHIP_y_C   = -RHIP_y_C;
+PELO_y_C   = -PELO_y_C;
+PELP_y_C   = -PELP_y_C;
+TRXO_y_C   = -TRXO_y_C;
+TRXP_y_C   = -TRXP_y_C;
+FP2_force_y_C = -FP2_force_y_C;   % horizontal ground reaction force
+FP2_COP_y_C   = -FP2_COP_y_C;     % centre of pressure
+
 Frame_C = data_trc_C.Frame;
 
 % ===== CROUCH: joint angles (right side) =====
 trunk_dy_C = TRXO_y_C - TRXP_y_C;
 trunk_dz_C = TRXO_z_C - TRXP_z_C;
-trunk_angle_C = atan2(-trunk_dy_C, trunk_dz_C);          % rad
+trunk_angle_C = atan2(trunk_dy_C, trunk_dz_C);          % rad
 trunk_angle_C_deg = rad2deg(trunk_angle_C);
 
 pelvis_dy_C = PELP_y_C - PELO_y_C;
 pelvis_dz_C = PELP_z_C - PELO_z_C;
-pelvis_angle_C = atan2(-pelvis_dy_C, pelvis_dz_C);       % rad
+pelvis_angle_C = atan2(pelvis_dy_C, pelvis_dz_C);       % rad
 pelvis_angle_C_deg = rad2deg(pelvis_angle_C);
 
 thigh_R_dy_C = RHIP_y_C - RKNEE_y_C;
 thigh_R_dz_C = RHIP_z_C - RKNEE_z_C;
-thigh_R_abs_C = atan2(-thigh_R_dy_C, thigh_R_dz_C);
-hip_R_C = rad2deg(thigh_R_abs_C - pelvis_angle_C);
+thigh_R_abs_C = atan2(thigh_R_dy_C, thigh_R_dz_C);
+hip_R_C = rad2deg(pelvis_angle_C - thigh_R_abs_C);
 
 shank_R_dy_C = RKNEE_y_C - RANKLE_y_C;
 shank_R_dz_C = RKNEE_z_C - RANKLE_z_C;
-shank_R_abs_C = atan2(-shank_R_dy_C, shank_R_dz_C);
+shank_R_abs_C = atan2(shank_R_dy_C, shank_R_dz_C);
 knee_R_C = rad2deg(shank_R_abs_C - thigh_R_abs_C);
 
 foot_R_dy_C = RTOE_y_C - RANKLE_y_C;
 foot_R_dz_C = RTOE_z_C - RANKLE_z_C;
-foot_R_abs_C = atan2(-foot_R_dy_C, foot_R_dz_C);
-ankle_R_C = rad2deg(foot_R_abs_C - shank_R_abs_C) - 90 + 5;
+foot_R_abs_C = atan2(foot_R_dy_C, foot_R_dz_C);
+ankle_R_C = 90- rad2deg(foot_R_abs_C - shank_R_abs_C) + 5;
 
 
 % ---------- Walking, right (124–212) ----------
@@ -469,10 +483,10 @@ COPz_WR(swing_WR) = com_foot_R_z_W(swing_WR);
 F_Ay_WR = m_foot * a_foot_R_y_W - GRFy_WR;
 F_Az_WR = m_foot * a_foot_R_z_W + m_foot*g - GRFz_WR;
 
-r_COP_y_WR = COPy_WR          - com_foot_R_y_W; % horizontal component of moment arm
-r_COP_z_WR = COPz_WR          - com_foot_R_z_W;
-r_ank_y_WR = RANKLE_y_W       - com_foot_R_y_W;
-r_ank_z_WR = RANKLE_z_W       - com_foot_R_z_W;
+r_COP_y_WR = COPy_WR - com_foot_R_y_W; % horizontal component of moment arm
+r_COP_z_WR = com_foot_R_z_W - COPz_WR;
+r_ank_y_WR = com_foot_R_y_W - RANKLE_y_W;
+r_ank_z_WR = RANKLE_z_W - com_foot_R_z_W;
 
 M_GRF_WR   = r_COP_y_WR .* GRFz_WR  + r_COP_z_WR .* GRFy_WR;
 M_Fank_WR  = r_ank_y_WR .* F_Az_WR  + r_ank_z_WR .* F_Ay_WR;
@@ -490,8 +504,8 @@ M_A_WR = I_foot_R_W * alpha_foot_R_W - M_GRF_WR + M_Fank_WR;
 F_Ky_WR = m_shank * a_shank_R_y_W + F_Ay_WR;
 F_Kz_WR = m_shank * a_shank_R_z_W + m_shank*g + F_Az_WR;
 
-r_ank_s_y_WR = RANKLE_y_W  - com_shank_R_y_W;
-r_ank_s_z_WR = RANKLE_z_W  - com_shank_R_z_W;
+r_ank_s_y_WR = com_shank_R_y_W - RANKLE_y_W;
+r_ank_s_z_WR = com_shank_R_z_W - RANKLE_z_W;
 r_kne_y_WR   = RKNEE_y_W   - com_shank_R_y_W;
 r_kne_z_WR   = RKNEE_z_W   - com_shank_R_z_W;
 
@@ -514,8 +528,8 @@ F_Hy_WR = m_thigh * a_thigh_R_y_W + F_Ky_WR;
 F_Hz_WR = m_thigh * a_thigh_R_z_W + m_thigh*g + F_Kz_WR;
 
 r_kne_t_y_WR = RKNEE_y_W  - com_thigh_R_y_W;
-r_kne_t_z_WR = RKNEE_z_W  - com_thigh_R_z_W;
-r_hip_y_WR   = RHIP_y_W   - com_thigh_R_y_W;
+r_kne_t_z_WR =com_thigh_R_z_W - RKNEE_z_W ;
+r_hip_y_WR   = com_thigh_R_y_W - RHIP_y_W ;
 r_hip_z_WR   = RHIP_z_W   - com_thigh_R_z_W;
 
 M_Fk_thigh_WR = - r_kne_t_y_WR .* (F_Kz_WR) - r_kne_t_z_WR .* (F_Ky_WR);
@@ -543,10 +557,10 @@ COPz_WL(swing_WL) = com_foot_L_z_W(swing_WL);
 F_Ay_WL = m_foot * a_foot_L_y_W - GRFy_WL;
 F_Az_WL = m_foot * a_foot_L_z_W + m_foot*g - GRFz_WL;
 
-r_COP_y_WL = COPy_WL      - com_foot_L_y_W;
-r_COP_z_WL = COPz_WL      - com_foot_L_z_W;
-r_ank_y_WL = LANKLE_y_W   - com_foot_L_y_W;
-r_ank_z_WL = LANKLE_z_W   - com_foot_L_z_W;
+r_COP_y_WL = COPy_WL - com_foot_L_y_W; % horizontal component of moment arm
+r_COP_z_WL = com_foot_L_z_W - COPz_WL;
+r_ank_y_WL = com_foot_L_y_W - LANKLE_y_W;
+r_ank_z_WL = LANKLE_z_W - com_foot_L_z_W;
 
 M_GRF_WL  = r_COP_y_WL .* GRFz_WL  + r_COP_z_WL .* GRFy_WL;
 M_Fank_WL = r_ank_y_WL .* F_Az_WL  + r_ank_z_WL .* F_Ay_WL;
@@ -557,8 +571,8 @@ M_A_WL = I_foot_L_W * alpha_foot_L_W - M_GRF_WL + M_Fank_WL;
 F_Ky_WL = m_shank * a_shank_L_y_W + F_Ay_WL;
 F_Kz_WL = m_shank * a_shank_L_z_W + m_shank*g + F_Az_WL;
 
-r_ank_s_y_WL = LANKLE_y_W  - com_shank_L_y_W;
-r_ank_s_z_WL = LANKLE_z_W  - com_shank_L_z_W;
+r_ank_s_y_WL = com_shank_L_y_W - LANKLE_y_W;
+r_ank_s_z_WL = com_shank_L_z_W - LANKLE_z_W;
 r_kne_y_WL   = LKNEE_y_W   - com_shank_L_y_W;
 r_kne_z_WL   = LKNEE_z_W   - com_shank_L_z_W;
 
@@ -572,8 +586,8 @@ F_Hy_WL = m_thigh * a_thigh_L_y_W + F_Ky_WL;
 F_Hz_WL = m_thigh * a_thigh_L_z_W + m_thigh*g + F_Kz_WL;
 
 r_kne_t_y_WL = LKNEE_y_W  - com_thigh_L_y_W;
-r_kne_t_z_WL = LKNEE_z_W  - com_thigh_L_z_W;
-r_hip_y_WL   = LHIP_y_W   - com_thigh_L_y_W;
+r_kne_t_z_WL =com_thigh_L_z_W - LKNEE_z_W ;
+r_hip_y_WL   = com_thigh_L_y_W - LHIP_y_W ;
 r_hip_z_WL   = LHIP_z_W   - com_thigh_L_z_W;
 
 M_Fk_thigh_WL = - r_kne_t_y_WL .* (F_Kz_WL) - r_kne_t_z_WL .* (F_Ky_WL);
@@ -599,10 +613,10 @@ COPz_CR(swing_CR) = com_foot_R_z_C(swing_CR);
 F_Ay_CR = m_foot * a_foot_R_y_C - GRFy_CR;
 F_Az_CR = m_foot * a_foot_R_z_C + m_foot*g - GRFz_CR;
 
-r_COP_y_CR = COPy_CR      - com_foot_R_y_C;
-r_COP_z_CR = COPz_CR      - com_foot_R_z_C;
-r_ank_y_CR = RANKLE_y_C   - com_foot_R_y_C;
-r_ank_z_CR = RANKLE_z_C   - com_foot_R_z_C;
+r_COP_y_CR = COPy_CR - com_foot_R_y_C; 
+r_COP_z_CR = com_foot_R_z_C - COPz_CR;
+r_ank_y_CR = com_foot_R_y_C - RANKLE_y_C;
+r_ank_z_CR = RANKLE_z_C - com_foot_R_z_C;
 
 M_GRF_CR  = r_COP_y_CR .* GRFz_CR  + r_COP_z_CR .* GRFy_CR;
 M_Fank_CR = r_ank_y_CR .* F_Az_CR  + r_ank_z_CR .* F_Ay_CR;
@@ -613,8 +627,8 @@ M_A_CR = I_foot_R_C * alpha_foot_R_C - M_GRF_CR + M_Fank_CR;
 F_Ky_CR = m_shank * a_shank_R_y_C + F_Ay_CR;
 F_Kz_CR = m_shank * a_shank_R_z_C + m_shank*g + F_Az_CR;
 
-r_ank_s_y_CR = RANKLE_y_C  - com_shank_R_y_C;
-r_ank_s_z_CR = RANKLE_z_C  - com_shank_R_z_C;
+r_ank_s_y_CR = com_shank_R_y_C - RANKLE_y_C;
+r_ank_s_z_CR = com_shank_R_z_C - RANKLE_z_C;
 r_kne_y_CR   = RKNEE_y_C   - com_shank_R_y_C;
 r_kne_z_CR   = RKNEE_z_C   - com_shank_R_z_C;
 
@@ -627,9 +641,9 @@ M_K_CR = I_shank_R_C * alpha_shank_R_C - M_Fank_shank_CR - M_Fk_shank_CR + M_A_C
 F_Hy_CR = m_thigh * a_thigh_R_y_C + F_Ky_CR;
 F_Hz_CR = m_thigh * a_thigh_R_z_C + m_thigh*g + F_Kz_CR;
 
-r_kne_t_y_CR = RKNEE_y_C  - com_thigh_R_y_C;
-r_kne_t_z_CR = RKNEE_z_C  - com_thigh_R_z_C;
-r_hip_y_CR   = RHIP_y_C   - com_thigh_R_y_C;
+r_kne_t_y_CR = RKNEE_y_C - com_thigh_R_y_C;
+r_kne_t_z_CR =com_thigh_R_z_C - RKNEE_z_C ;
+r_hip_y_CR   = com_thigh_R_y_C - RHIP_y_C ;
 r_hip_z_CR   = RHIP_z_C   - com_thigh_R_z_C;
 
 M_Fk_thigh_CR = - r_kne_t_y_CR .* (F_Kz_CR) - r_kne_t_z_CR .* (F_Ky_CR);

@@ -1,0 +1,4 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Info Type="StartUp" Visible="0" Icon="" File="Walking.csv" Name="Walking">
+    <Extension Value="e6dade43-fb9e-480a-930b-06bf8c1d5b29" Name="StartUpPrev"/>
+</Info>

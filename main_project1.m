@@ -491,7 +491,7 @@ r_ank_z_WR = RANKLE_z_W - com_foot_R_z_W;
 M_GRF_WR   = r_COP_y_WR .* GRFz_WR  + r_COP_z_WR .* GRFy_WR;
 M_Fank_WR  = r_ank_y_WR .* F_Az_WR  + r_ank_z_WR .* F_Ay_WR;
 
-M_A_WR = I_foot_R_W * alpha_foot_R_W - M_GRF_WR + M_Fank_WR;
+M_A_WR = -I_foot_R_W * alpha_foot_R_W - M_GRF_WR + M_Fank_WR;
 % Sign check: ankle plantarflexor moment should be negative according to chosen convention 
 
 % ── SHANK (Walking Right) ─────────────────────────────────
@@ -663,7 +663,7 @@ omega_knee_WR  = gradient(deg2rad(knee_R_W),  dt);
 omega_hip_WR   = gradient(deg2rad(hip_R_W),   dt);
 
 P_ankle_WR = M_A_WR .* omega_ankle_WR;
-P_knee_WR  = M_K_WR .* omega_knee_WR;
+P_knee_WR  = -M_K_WR .* omega_knee_WR;
 P_hip_WR   = M_H_WR .* omega_hip_WR;
 
 % Walking left
@@ -672,7 +672,7 @@ omega_knee_WL  = gradient(deg2rad(knee_L_W),  dt);
 omega_hip_WL   = gradient(deg2rad(hip_L_W),   dt);
 
 P_ankle_WL = M_A_WL .* omega_ankle_WL;
-P_knee_WL  = M_K_WL .* omega_knee_WL;
+P_knee_WL  = -M_K_WL .* omega_knee_WL;
 P_hip_WL   = M_H_WL .* omega_hip_WL;
 
 % Crouch right
@@ -681,7 +681,7 @@ omega_knee_CR  = gradient(deg2rad(knee_R_C),  dt);
 omega_hip_CR   = gradient(deg2rad(hip_R_C),   dt);
 
 P_ankle_CR = M_A_CR .* omega_ankle_CR;
-P_knee_CR  = M_K_CR .* omega_knee_CR;
+P_knee_CR  = -M_K_CR .* omega_knee_CR;
 P_hip_CR   = M_H_CR .* omega_hip_CR;
 
 

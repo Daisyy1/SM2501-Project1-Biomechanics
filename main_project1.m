@@ -160,7 +160,8 @@ ankle_R_W = 90 - rad2deg(foot_R_abs_W - shank_R_abs_W) + 5;
 foot_L_dy_W = LTOE_y_W - LANKLE_y_W; % toe minus ankle = foot vector
 foot_L_dz_W = LTOE_z_W - LANKLE_z_W;
 foot_L_abs_W = atan2(foot_L_dy_W, foot_L_dz_W);
-ankle_L_W = 90 - rad2deg(foot_L_abs_W - shank_L_abs_W) + 5;
+ankle_L_W = 90 - rad2deg(foot_L_abs_W - shank_L_abs_W) + 5; %convention: dorsi is POSITIVE 
+% (if we did angle -90 then plantar would have been positive)
 %{
 figure (7);
 plot(ankle_R_W)
@@ -191,33 +192,46 @@ TRXP_y_C=data_trc_C.TRXP_Y*toMeters;   TRXP_z_C=data_trc_C.TRXP_Z*toMeters;
 FP2_force_y_C=data_grf_s_C.FP2_Force_Y;  FP2_force_z_C=data_grf_s_C.FP2_Force_Z;
 FP2_COP_y_C=(-600 - data_grf_s_C.FP2_COP_Y)*toMeters;  FP2_COP_z_C=data_grf_s_C.FP2_COP_Z*toMeters;
 
+% Crouch walking goes toward -y (normal walking toward +y).
+% Flip all crouch y data so that +y is the walking direction in both trials.
+RTOE_y_C   = -RTOE_y_C;
+RANKLE_y_C = -RANKLE_y_C;
+RKNEE_y_C  = -RKNEE_y_C;
+RHIP_y_C   = -RHIP_y_C;
+PELO_y_C   = -PELO_y_C;
+PELP_y_C   = -PELP_y_C;
+TRXO_y_C   = -TRXO_y_C;
+TRXP_y_C   = -TRXP_y_C;
+FP2_force_y_C = -FP2_force_y_C;   % horizontal ground reaction force
+FP2_COP_y_C   = -FP2_COP_y_C;     % centre of pressure
+
 Frame_C = data_trc_C.Frame;
 
 % ===== CROUCH: joint angles (right side) =====
 trunk_dy_C = TRXO_y_C - TRXP_y_C;
 trunk_dz_C = TRXO_z_C - TRXP_z_C;
-trunk_angle_C = atan2(-trunk_dy_C, trunk_dz_C);          % rad
+trunk_angle_C = atan2(trunk_dy_C, trunk_dz_C);          % rad
 trunk_angle_C_deg = rad2deg(trunk_angle_C);
 
 pelvis_dy_C = PELP_y_C - PELO_y_C;
 pelvis_dz_C = PELP_z_C - PELO_z_C;
-pelvis_angle_C = atan2(-pelvis_dy_C, pelvis_dz_C);       % rad
+pelvis_angle_C = atan2(pelvis_dy_C, pelvis_dz_C);       % rad
 pelvis_angle_C_deg = rad2deg(pelvis_angle_C);
 
 thigh_R_dy_C = RHIP_y_C - RKNEE_y_C;
 thigh_R_dz_C = RHIP_z_C - RKNEE_z_C;
-thigh_R_abs_C = atan2(-thigh_R_dy_C, thigh_R_dz_C);
-hip_R_C = rad2deg(thigh_R_abs_C - pelvis_angle_C);
+thigh_R_abs_C = atan2(thigh_R_dy_C, thigh_R_dz_C);
+hip_R_C = rad2deg(pelvis_angle_C - thigh_R_abs_C);
 
 shank_R_dy_C = RKNEE_y_C - RANKLE_y_C;
 shank_R_dz_C = RKNEE_z_C - RANKLE_z_C;
-shank_R_abs_C = atan2(-shank_R_dy_C, shank_R_dz_C);
+shank_R_abs_C = atan2(shank_R_dy_C, shank_R_dz_C);
 knee_R_C = rad2deg(shank_R_abs_C - thigh_R_abs_C);
 
 foot_R_dy_C = RTOE_y_C - RANKLE_y_C;
 foot_R_dz_C = RTOE_z_C - RANKLE_z_C;
-foot_R_abs_C = atan2(-foot_R_dy_C, foot_R_dz_C);
-ankle_R_C = rad2deg(foot_R_abs_C - shank_R_abs_C) - 90 + 5;
+foot_R_abs_C = atan2(foot_R_dy_C, foot_R_dz_C);
+ankle_R_C = 90- rad2deg(foot_R_abs_C - shank_R_abs_C) + 5;
 
 
 % ---------- Walking, right (124–212) ----------
@@ -644,31 +658,31 @@ M_H_CR = I_thigh_R_C * alpha_thigh_R_C - M_Fk_thigh_CR - M_Fh_thigh_CR + M_K_CR;
 %% =========================================================
 
 % Walking right
-omega_ankle_WR = gradient(deg2rad(ankle_R_W), dt);
-omega_knee_WR  = gradient(deg2rad(knee_R_W),  dt);
-omega_hip_WR   = gradient(deg2rad(hip_R_W),   dt);
+omega_ankle_WR = gradient(deg2rad(-ankle_R_W), dt);
+omega_knee_WR  = gradient(deg2rad(-knee_R_W),  dt);
+omega_hip_WR   = gradient(deg2rad(-hip_R_W),   dt);
 
-P_ankle_WR = M_A_WR .* omega_ankle_WR;
+P_ankle_WR = -M_A_WR .* omega_ankle_WR;
 P_knee_WR  = M_K_WR .* omega_knee_WR;
-P_hip_WR   = M_H_WR .* omega_hip_WR;
+P_hip_WR   = -M_H_WR .* omega_hip_WR;
 
 % Walking left
-omega_ankle_WL = gradient(deg2rad(ankle_L_W), dt);
-omega_knee_WL  = gradient(deg2rad(knee_L_W),  dt);
-omega_hip_WL   = gradient(deg2rad(hip_L_W),   dt);
+omega_ankle_WL = gradient(deg2rad(-ankle_L_W), dt);
+omega_knee_WL  = gradient(deg2rad(-knee_L_W),  dt);
+omega_hip_WL   = gradient(deg2rad(-hip_L_W),   dt);
 
-P_ankle_WL = M_A_WL .* omega_ankle_WL;
+P_ankle_WL = -M_A_WL .* omega_ankle_WL;
 P_knee_WL  = M_K_WL .* omega_knee_WL;
-P_hip_WL   = M_H_WL .* omega_hip_WL;
+P_hip_WL   = -M_H_WL .* omega_hip_WL;
 
 % Crouch right
-omega_ankle_CR = gradient(deg2rad(ankle_R_C), dt);
-omega_knee_CR  = gradient(deg2rad(knee_R_C),  dt);
-omega_hip_CR   = gradient(deg2rad(hip_R_C),   dt);
+omega_ankle_CR = gradient(deg2rad(-ankle_R_C), dt);
+omega_knee_CR  = gradient(deg2rad(-knee_R_C),  dt);
+omega_hip_CR   = gradient(deg2rad(-hip_R_C),   dt);
 
-P_ankle_CR = M_A_CR .* omega_ankle_CR;
+P_ankle_CR = -M_A_CR .* omega_ankle_CR;
 P_knee_CR  = M_K_CR .* omega_knee_CR;
-P_hip_CR   = M_H_CR .* omega_hip_CR;
+P_hip_CR   = -M_H_CR .* omega_hip_CR;
 
 
 %% ===== Figures 2 and 4: joint moments (top row) and powers (bottom row) =====
@@ -679,11 +693,11 @@ P_hip_CR   = M_H_CR .* omega_hip_CR;
 % Make sure M_* and P_* already follow this convention before exporting.
 
 % ---- extract one gait cycle (hip, knee, ankle) ----
-M_WR_gc = {M_H_WR(rows_W_R),   M_K_WR(rows_W_R),    M_A_WR(rows_W_R)};
+M_WR_gc = {-M_H_WR(rows_W_R),   M_K_WR(rows_W_R),    -M_A_WR(rows_W_R)};
 P_WR_gc = {P_hip_WR(rows_W_R), P_knee_WR(rows_W_R), P_ankle_WR(rows_W_R)};
-M_WL_gc = {M_H_WL(rows_W_L),   M_K_WL(rows_W_L),    M_A_WL(rows_W_L)};
+M_WL_gc = {-M_H_WL(rows_W_L),   M_K_WL(rows_W_L),    -M_A_WL(rows_W_L)};
 P_WL_gc = {P_hip_WL(rows_W_L), P_knee_WL(rows_W_L), P_ankle_WL(rows_W_L)};
-M_CR_gc = {M_H_CR(rows_C_R),   M_K_CR(rows_C_R),    M_A_CR(rows_C_R)};
+M_CR_gc = {-M_H_CR(rows_C_R),   M_K_CR(rows_C_R),    -M_A_CR(rows_C_R)};
 P_CR_gc = {P_hip_CR(rows_C_R), P_knee_CR(rows_C_R), P_ankle_CR(rows_C_R)};
 
 jointNames = {'Hip', 'Knee', 'Ankle'};

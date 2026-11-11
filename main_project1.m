@@ -693,11 +693,11 @@ P_hip_CR   = M_H_CR .* omega_hip_CR;
 % Make sure M_* and P_* already follow this convention before exporting.
 
 % ---- extract one gait cycle (hip, knee, ankle) ----
-M_WR_gc = {M_H_WR(rows_W_R),   M_K_WR(rows_W_R),    M_A_WR(rows_W_R)};
+M_WR_gc = {-M_H_WR(rows_W_R),   M_K_WR(rows_W_R),    -M_A_WR(rows_W_R)};
 P_WR_gc = {P_hip_WR(rows_W_R), P_knee_WR(rows_W_R), P_ankle_WR(rows_W_R)};
-M_WL_gc = {M_H_WL(rows_W_L),   M_K_WL(rows_W_L),    M_A_WL(rows_W_L)};
+M_WL_gc = {-M_H_WL(rows_W_L),   M_K_WL(rows_W_L),    -M_A_WL(rows_W_L)};
 P_WL_gc = {P_hip_WL(rows_W_L), P_knee_WL(rows_W_L), P_ankle_WL(rows_W_L)};
-M_CR_gc = {M_H_CR(rows_C_R),   M_K_CR(rows_C_R),    M_A_CR(rows_C_R)};
+M_CR_gc = {-M_H_CR(rows_C_R),   M_K_CR(rows_C_R),    -M_A_CR(rows_C_R)};
 P_CR_gc = {P_hip_CR(rows_C_R), P_knee_CR(rows_C_R), P_ankle_CR(rows_C_R)};
 
 jointNames = {'Hip', 'Knee', 'Ankle'};

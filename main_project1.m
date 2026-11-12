@@ -512,7 +512,7 @@ r_kne_z_WR   = RKNEE_z_W   - com_shank_R_z_W;
 M_Fank_shank_WR = r_ank_s_y_WR .* (F_Az_WR) - r_ank_s_z_WR .* (F_Ay_WR);
 M_Fk_shank_WR   = r_kne_y_WR   .* F_Kz_WR    - r_kne_z_WR   .* F_Ky_WR;
 
-M_K_WR = I_shank_R_W * alpha_shank_R_W - M_Fank_shank_WR - M_Fk_shank_WR + M_A_WR;
+M_K_WR = -I_shank_R_W * alpha_shank_R_W - M_Fank_shank_WR - M_Fk_shank_WR + M_A_WR;
 % Sign check: knee extensor moment should be positive  
 % i'm not sure of F(Az)and F(Ay) signs bc they are upside down so should 
 % put a - in front? or then the values will just turn out negative in case?.
@@ -535,7 +535,7 @@ r_hip_z_WR   = RHIP_z_W   - com_thigh_R_z_W;
 M_Fk_thigh_WR = - r_kne_t_y_WR .* (F_Kz_WR) - r_kne_t_z_WR .* (F_Ky_WR);
 M_Fh_thigh_WR = - r_hip_y_WR   .* F_Hz_WR    - r_hip_z_WR   .* F_Hy_WR;
 
-M_H_WR = I_thigh_R_W * alpha_thigh_R_W - M_Fk_thigh_WR - M_Fh_thigh_WR + M_K_WR;
+M_H_WR = -I_thigh_R_W * alpha_thigh_R_W - M_Fk_thigh_WR - M_Fh_thigh_WR + M_K_WR;
 % Sign check: hip extensor moment should be negative and flexors positive.
 % check!;
 
@@ -565,7 +565,7 @@ r_ank_z_WL = LANKLE_z_W - com_foot_L_z_W;
 M_GRF_WL  = r_COP_y_WL .* GRFz_WL  + r_COP_z_WL .* GRFy_WL;
 M_Fank_WL = r_ank_y_WL .* F_Az_WL  + r_ank_z_WL .* F_Ay_WL;
 
-M_A_WL = I_foot_L_W * alpha_foot_L_W - M_GRF_WL + M_Fank_WL;
+M_A_WL = -I_foot_L_W * alpha_foot_L_W - M_GRF_WL + M_Fank_WL;
 
 % ── SHANK (Walking Left) ──────────────────────────────────
 F_Ky_WL = m_shank * a_shank_L_y_W + F_Ay_WL;
@@ -579,7 +579,7 @@ r_kne_z_WL   = LKNEE_z_W   - com_shank_L_z_W;
 M_Fank_shank_WL = r_ank_s_y_WL .* (F_Az_WL) - r_ank_s_z_WL .* (F_Ay_WL);
 M_Fk_shank_WL   = r_kne_y_WL   .* F_Kz_WL   - r_kne_z_WL   .* F_Ky_WL;
 
-M_K_WL = I_shank_L_W * alpha_shank_L_W - M_Fank_shank_WL - M_Fk_shank_WL + M_A_WL;
+M_K_WL = -I_shank_L_W * alpha_shank_L_W - M_Fank_shank_WL - M_Fk_shank_WL + M_A_WL;
 
 % ── THIGH (Walking Left) ──────────────────────────────────
 F_Hy_WL = m_thigh * a_thigh_L_y_W + F_Ky_WL;
@@ -593,7 +593,7 @@ r_hip_z_WL   = LHIP_z_W   - com_thigh_L_z_W;
 M_Fk_thigh_WL = - r_kne_t_y_WL .* (F_Kz_WL) - r_kne_t_z_WL .* (F_Ky_WL);
 M_Fh_thigh_WL = - r_hip_y_WL   .* F_Hz_WL   - r_hip_z_WL   .* F_Hy_WL;
 
-M_H_WL = I_thigh_L_W * alpha_thigh_L_W - M_Fk_thigh_WL - M_Fh_thigh_WL + M_K_WL;
+M_H_WL = -I_thigh_L_W * alpha_thigh_L_W - M_Fk_thigh_WL - M_Fh_thigh_WL + M_K_WL;
 
 % ═════════════════════════════════════════════════════════
 %  4.3  CROUCH — RIGHT 
@@ -621,7 +621,7 @@ r_ank_z_CR = RANKLE_z_C - com_foot_R_z_C;
 M_GRF_CR  = r_COP_y_CR .* GRFz_CR  + r_COP_z_CR .* GRFy_CR;
 M_Fank_CR = r_ank_y_CR .* F_Az_CR  + r_ank_z_CR .* F_Ay_CR;
 
-M_A_CR = I_foot_R_C * alpha_foot_R_C - M_GRF_CR + M_Fank_CR;
+M_A_CR = -I_foot_R_C * alpha_foot_R_C - M_GRF_CR + M_Fank_CR;
 
 % ── SHANK (Crouch Right) ──────────────────────────────────
 F_Ky_CR = m_shank * a_shank_R_y_C + F_Ay_CR;
@@ -635,7 +635,7 @@ r_kne_z_CR   = RKNEE_z_C   - com_shank_R_z_C;
 M_Fank_shank_CR = r_ank_s_y_CR .* (F_Az_CR) - r_ank_s_z_CR .* (F_Ay_CR);
 M_Fk_shank_CR   = r_kne_y_CR   .* F_Kz_CR   - r_kne_z_CR   .* F_Ky_CR;
 
-M_K_CR = I_shank_R_C * alpha_shank_R_C - M_Fank_shank_CR - M_Fk_shank_CR + M_A_CR;
+M_K_CR = -I_shank_R_C * alpha_shank_R_C - M_Fank_shank_CR - M_Fk_shank_CR + M_A_CR;
 
 % ── THIGH (Crouch Right) ──────────────────────────────────
 F_Hy_CR = m_thigh * a_thigh_R_y_C + F_Ky_CR;
@@ -649,7 +649,7 @@ r_hip_z_CR   = RHIP_z_C   - com_thigh_R_z_C;
 M_Fk_thigh_CR = - r_kne_t_y_CR .* (F_Kz_CR) - r_kne_t_z_CR .* (F_Ky_CR);
 M_Fh_thigh_CR = - r_hip_y_CR   .* F_Hz_CR   - r_hip_z_CR   .* F_Hy_CR;
 
-M_H_CR = I_thigh_R_C * alpha_thigh_R_C - M_Fk_thigh_CR - M_Fh_thigh_CR + M_K_CR;
+M_H_CR = -I_thigh_R_C * alpha_thigh_R_C - M_Fk_thigh_CR - M_Fh_thigh_CR + M_K_CR;
 
 
 %% =========================================================
